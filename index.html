@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fuzion Fitness & Dance — Santo Tomé</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            verde: '#a8e63d',
+            magenta: '#e020a0',
+            violeta: '#8820e0',
+            oscuro: '#0a0a0a',
+            gris: '#141414',
+            gris2: '#1e1e1e',
+          },
+          fontFamily: {
+            display: ['Bebas Neue', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'DM Sans', sans-serif; }
+    .gradient-text {
+      background: linear-gradient(135deg, #a8e63d, #e020a0, #8820e0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-border {
+      background: linear-gradient(135deg, #a8e63d, #e020a0, #8820e0);
+      padding: 1px;
+      border-radius: 16px;
+    }
+    .card-glow:hover {
+      box-shadow: 0 0 30px rgba(168, 230, 61, 0.15);
+    }
+    .schedule-cell {
+      transition: all 0.2s;
+    }
+    .schedule-cell:hover {
+      background: rgba(168, 230, 61, 0.15);
+      transform: scale(1.02);
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .hero-glow {
+      background: radial-gradient(ellipse at 60% 50%, rgba(168,230,61,0.08) 0%, rgba(232,32,160,0.06) 40%, transparent 70%);
+    }
+    input, textarea, select {
+      font-family: 'DM Sans', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-oscuro text-white overflow-x-hidden">
+
+  <!-- =====================
+       NAV
+       ===================== -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-oscuro/90 backdrop-blur-md border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="font-display text-2xl gradient-text">fuZion</div>
+
+      <!-- Desktop nav -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#actividades" class="text-white/60 hover:text-white text-sm transition-colors">Actividades</a>
+        <a href="#horarios" class="text-white/60 hover:text-white text-sm transition-colors">Horarios</a>
+        <a href="#tienda" class="text-white/60 hover:text-white text-sm transition-colors">Tienda</a>
+        <a href="#membresias" class="text-white/60 hover:text-white text-sm transition-colors">Membresías</a>
+        <a href="#contacto" class="text-white/60 hover:text-white text-sm transition-colors">Contacto</a>
+        <button onclick="openModal('loginModal')" class="bg-verde text-oscuro px-5 py-2 rounded-full text-sm font-medium hover:opacity-85 transition-opacity">
+          Mi cuenta
+        </button>
+      </div>
+
+      <!-- Cart + Mobile toggle -->
+      <div class="flex items-center gap-4">
+        <button onclick="openCart()" class="relative p-2">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          <span id="cartCount" class="absolute -top-1 -right-1 w-4 h-4 bg-magenta text-white text-xs rounded-full flex items-center justify-center hidden">0</span>
+        </button>
+        <button onclick="toggleMobileNav()" class="md:hidden flex flex-col gap-1.5 p-1">
+          <span class="block w-6 h-0.5 bg-white"></span>
+          <span class="block w-6 h-0.5 bg-white"></span>
+          <span class="block w-4 h-0.5 bg-white"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile nav -->
+    <div id="mobileNav" class="hidden md:hidden bg-gris border-t border-white/5 px-6 py-4 flex flex-col gap-4">
+      <a href="#actividades" onclick="toggleMobileNav()" class="text-white/70 text-sm">Actividades</a>
+      <a href="#horarios" onclick="toggleMobileNav()" class="text-white/70 text-sm">Horarios</a>
+      <a href="#tienda" onclick="toggleMobileNav()" class="text-white/70 text-sm">Tienda</a>
+      <a href="#membresias" onclick="toggleMobileNav()" class="text-white/70 text-sm">Membresías</a>
+      <a href="#contacto" onclick="toggleMobileNav()" class="text-white/70 text-sm">Contacto</a>
+      <button onclick="openModal('loginModal'); toggleMobileNav()" class="bg-verde text-oscuro px-5 py-2 rounded-full text-sm font-medium w-fit">Mi cuenta</button>
+    </div>
+  </nav>
+
+  <!-- =====================
+       HERO
+       ===================== -->
+  <section class="hero-glow min-h-screen flex items-center pt-20" id="hero">
+    <div class="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-16 items-center">
+      <div class="fade-in">
+        <span class="inline-flex items-center gap-2 text-verde text-xs font-medium uppercase tracking-widest mb-6 border border-verde/30 px-4 py-2 rounded-full">
+          <span class="w-1.5 h-1.5 bg-verde rounded-full animate-pulse"></span>
+          Santo Tomé, Santa Fe
+        </span>
+        <h1 class="font-display text-6xl md:text-8xl leading-none mb-6">
+          ENTRENÁ.<br>
+          <span class="gradient-text">BAILÁ.</span><br>
+          VIVÍ.
+        </h1>
+        <p class="text-white/60 text-lg leading-relaxed mb-10 max-w-md">
+          Entrenamiento personalizado y clases grupales en el corazón de Santo Tomé.
+          Zumba, Funcional, Boxeo, Acrotelas y mucho más.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="#membresias" class="bg-verde text-oscuro px-8 py-4 rounded-full font-medium hover:opacity-85 transition-all hover:-translate-y-1">
+            Ver membresías
+          </a>
+          <a href="#horarios" class="border border-white/20 text-white px-8 py-4 rounded-full font-medium hover:border-white/40 transition-all">
+            Ver horarios →
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="flex gap-8 mt-12 pt-12 border-t border-white/10">
+          <div>
+            <div class="font-display text-4xl text-verde">8+</div>
+            <div class="text-white/50 text-sm">Disciplinas</div>
+          </div>
+          <div>
+            <div class="font-display text-4xl text-magenta">3829</div>
+            <div class="text-white/50 text-sm">Seguidores</div>
+          </div>
+          <div>
+            <div class="font-display text-4xl text-violeta">100%</div>
+            <div class="text-white/50 text-sm">Energía</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual cards -->
+      <div class="relative fade-in hidden md:block" style="transition-delay:0.2s">
+        <div class="bg-gris2 border border-white/10 rounded-2xl p-6 mb-4 card-glow">
+          <div class="text-xs text-white/40 uppercase tracking-widest mb-2">Próxima clase</div>
+          <div class="font-display text-3xl text-verde mb-1">ZUMBA</div>
+          <div class="text-white/60 text-sm">Hoy · 18:00 hs</div>
+          <a href="#horarios" class="mt-4 inline-block text-xs text-verde border border-verde/30 px-3 py-1 rounded-full hover:bg-verde/10 transition-colors">Ver horario completo →</a>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-gris2 border border-white/10 rounded-2xl p-5 card-glow">
+            <div class="text-2xl mb-2">🥊</div>
+            <div class="font-display text-xl text-white">BOXEO</div>
+            <div class="text-white/40 text-xs mt-1">Mar · Jue · Vie</div>
+          </div>
+          <div class="bg-gris2 border border-white/10 rounded-2xl p-5 card-glow">
+            <div class="text-2xl mb-2">🤸</div>
+            <div class="font-display text-xl text-white">ACROTELAS</div>
+            <div class="text-white/40 text-xs mt-1">Mié · Vie</div>
+          </div>
+          <div class="bg-gris2 border border-white/10 rounded-2xl p-5 card-glow">
+            <div class="text-2xl mb-2">💪</div>
+            <div class="font-display text-xl text-white">FUNCIONAL</div>
+            <div class="text-white/40 text-xs mt-1">Lun a Vie</div>
+          </div>
+          <div class="bg-gris2 border border-white/10 rounded-2xl p-5 card-glow">
+            <div class="text-2xl mb-2">🧘</div>
+            <div class="font-display text-xl text-white">STRETCHING</div>
+            <div class="text-white/40 text-xs mt-1">Lun · Mié · Vie</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================
+       ACTIVIDADES
+       ===================== -->
+  <section class="py-24 bg-gris" id="actividades">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="mb-12 fade-in">
+        <span class="text-verde text-xs uppercase tracking-widest font-medium">Lo que hacemos</span>
+        <h2 class="font-display text-5xl md:text-6xl mt-2">NUESTRAS <span class="gradient-text">ACTIVIDADES</span></h2>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Zumba -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-verde/30 transition-all group">
+          <div class="text-3xl mb-3">💃</div>
+          <h3 class="font-display text-2xl text-verde mb-2">ZUMBA</h3>
+          <p class="text-white/50 text-sm">Baile fitness de alta energía con ritmos latinos. Para todas las edades.</p>
+        </div>
+        <!-- Funcional -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-magenta/30 transition-all" style="transition-delay:0.1s">
+          <div class="text-3xl mb-3">💪</div>
+          <h3 class="font-display text-2xl text-magenta mb-2">FUNCIONAL</h3>
+          <p class="text-white/50 text-sm">Entrenamiento de fuerza y resistencia con peso corporal y equipamiento.</p>
+        </div>
+        <!-- Stretching -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-violeta/30 transition-all" style="transition-delay:0.2s">
+          <div class="text-3xl mb-3">🧘</div>
+          <h3 class="font-display text-2xl text-violeta mb-2">STRETCHING</h3>
+          <p class="text-white/50 text-sm">Flexibilidad, postura y relajación. Ideal para complementar cualquier entrenamiento.</p>
+        </div>
+        <!-- Boxeo -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-verde/30 transition-all" style="transition-delay:0.3s">
+          <div class="text-3xl mb-3">🥊</div>
+          <h3 class="font-display text-2xl text-verde mb-2">BOXEO</h3>
+          <p class="text-white/50 text-sm">Técnica, coordinación y cardio. Clases para principiantes y avanzados.</p>
+        </div>
+        <!-- Strong Nation -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-magenta/30 transition-all">
+          <div class="text-3xl mb-3">🔥</div>
+          <h3 class="font-display text-2xl text-magenta mb-2">STRONG NATION</h3>
+          <p class="text-white/50 text-sm">Alta intensidad con música sincronizada. Quemá calorías al máximo.</p>
+        </div>
+        <!-- Acrotelas -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-violeta/30 transition-all" style="transition-delay:0.1s">
+          <div class="text-3xl mb-3">🤸</div>
+          <h3 class="font-display text-2xl text-violeta mb-2">ACROTELAS</h3>
+          <p class="text-white/50 text-sm">Acrobacia aérea en telas. Fuerza, flexibilidad y arte en el aire.</p>
+        </div>
+        <!-- Zumba Kids -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-verde/30 transition-all" style="transition-delay:0.2s">
+          <div class="text-3xl mb-3">🧒</div>
+          <h3 class="font-display text-2xl text-verde mb-2">ZUMBA KIDS</h3>
+          <p class="text-white/50 text-sm">Baile y diversión para los más chicos. Actividad física desde temprana edad.</p>
+        </div>
+        <!-- GAP -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-6 card-glow hover:border-magenta/30 transition-all" style="transition-delay:0.3s">
+          <div class="text-3xl mb-3">🍑</div>
+          <h3 class="font-display text-2xl text-magenta mb-2">GAP</h3>
+          <p class="text-white/50 text-sm">Glúteos, abdominales y piernas. Tonificación específica de zona media e inferior.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================
+       HORARIOS
+       ===================== -->
+  <section class="py-24 bg-oscuro" id="horarios">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="mb-12 fade-in">
+        <span class="text-verde text-xs uppercase tracking-widest font-medium">Calendario semanal</span>
+        <h2 class="font-display text-5xl md:text-6xl mt-2">HORARIOS <span class="gradient-text">DE CLASES</span></h2>
+        <p class="text-white/50 mt-3 text-sm">Lunes a Viernes · 8:00 a 21:00 hs</p>
+      </div>
+
+      <div class="fade-in overflow-x-auto">
+        <table class="w-full border-collapse min-w-[700px]">
+          <thead>
+            <tr>
+              <th class="text-left p-3 text-white/40 text-xs uppercase tracking-widest font-medium w-20">Hora</th>
+              <th class="p-3 text-white/40 text-xs uppercase tracking-widest font-medium">LUN</th>
+              <th class="p-3 text-white/40 text-xs uppercase tracking-widest font-medium">MAR</th>
+              <th class="p-3 text-white/40 text-xs uppercase tracking-widest font-medium">MIÉ</th>
+              <th class="p-3 text-white/40 text-xs uppercase tracking-widest font-medium">JUE</th>
+              <th class="p-3 text-white/40 text-xs uppercase tracking-widest font-medium">VIE</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </div>
+
+      <p class="text-white/30 text-xs mt-6">* Sábados: Sala de musculación 8:30 a 12 hs · Consultar disponibilidad</p>
+    </div>
+  </section>
+
+  <!-- =====================
+       MEMBRESÍAS
+       ===================== -->
+  <section class="py-24 bg-gris" id="membresias">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="mb-12 fade-in">
+        <span class="text-verde text-xs uppercase tracking-widest font-medium">Planes</span>
+        <h2 class="font-display text-5xl md:text-6xl mt-2">MEMBRESÍAS <span class="gradient-text">& CLASES</span></h2>
+        <p class="text-white/50 mt-3">Elegí el plan que más se adapte a vos</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Básico -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-8 card-glow">
+          <div class="text-xs text-white/40 uppercase tracking-widest mb-4">Básico</div>
+          <div class="font-display text-5xl text-white mb-1">$8.000</div>
+          <div class="text-white/40 text-sm mb-8">por mes</div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> 2 clases por semana</li>
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> Acceso a vestuarios</li>
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> 1 actividad a elección</li>
+            <li class="flex items-center gap-3 text-sm text-white/40"><span class="text-white/20">✗</span> Clases online</li>
+            <li class="flex items-center gap-3 text-sm text-white/40"><span class="text-white/20">✗</span> Clases personalizadas</li>
+          </ul>
+          <button onclick="openModal('loginModal')" class="w-full border border-white/20 text-white py-3 rounded-full text-sm hover:border-verde/40 transition-colors">
+            Comenzar
+          </button>
+        </div>
+
+        <!-- Premium (destacado) -->
+        <div class="fade-in relative" style="transition-delay:0.1s">
+          <div class="gradient-border">
+            <div class="bg-gris2 rounded-2xl p-8">
+              <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-verde text-oscuro text-xs font-medium px-4 py-1 rounded-full uppercase tracking-wider">Más popular</span>
+              <div class="text-xs text-verde uppercase tracking-widest mb-4">Premium</div>
+              <div class="font-display text-5xl text-verde mb-1">$14.000</div>
+              <div class="text-white/40 text-sm mb-8">por mes</div>
+              <ul class="space-y-3 mb-8">
+                <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> Clases ilimitadas</li>
+                <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> Todas las actividades</li>
+                <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> Acceso a clases online</li>
+                <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-verde">✓</span> Videos exclusivos</li>
+                <li class="flex items-center gap-3 text-sm text-white/40"><span class="text-white/20">✗</span> Clases personalizadas</li>
+              </ul>
+              <button onclick="openModal('loginModal')" class="w-full bg-verde text-oscuro py-3 rounded-full text-sm font-medium hover:opacity-85 transition-opacity">
+                Comenzar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Elite -->
+        <div class="fade-in bg-gris2 border border-white/10 rounded-2xl p-8 card-glow" style="transition-delay:0.2s">
+          <div class="text-xs text-magenta uppercase tracking-widest mb-4">Elite</div>
+          <div class="font-display text-5xl text-magenta mb-1">$22.000</div>
+          <div class="text-white/40 text-sm mb-8">por mes</div>
+          <ul class="space-y-3 mb-8">
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-magenta">✓</span> Todo lo del Premium</li>
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-magenta">✓</span> 4 clases personalizadas</li>
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-magenta">✓</span> Plan de entrenamiento</li>
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-magenta">✓</span> Plan nutricional básico</li>
+            <li class="flex items-center gap-3 text-sm text-white/70"><span class="text-magenta">✓</span> Prioridad en horarios</li>
+          </ul>
+          <button onclick="openModal('loginModal')" class="w-full border border-magenta/40 text-magenta py-3 rounded-full text-sm hover:bg-magenta/10 transition-colors">
+            Comenzar
+          </button>
+        </div>
+      </div>
+
+      <!-- Clases online -->
+      <div class="mt-16 fade-in">
+        <div class="bg-gris2 border border-white/10 rounded-2xl p-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div>
+              <span class="text-violeta text-xs uppercase tracking-widest font-medium">Exclusivo Premium & Elite</span>
+              <h3 class="font-display text-3xl mt-2">CLASES ONLINE <span class="gradient-text">EN VIDEO</span></h3>
+              <p class="text-white/50 text-sm mt-2">Accedé a clases grabadas y en vivo desde donde estés</p>
+            </div>
+            <button onclick="openModal('loginModal')" class="bg-violeta text-white px-8 py-3 rounded-full text-sm font-medium hover:opacity-85 transition-opacity whitespace-nowrap">
+              Iniciar sesión para ver
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="relative rounded-xl overflow-hidden aspect-video bg-gris cursor-pointer group" onclick="openModal('loginModal')">
+              <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&q=80" alt="Zumba" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity">
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center mb-2">
+                  <svg class="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span class="text-white text-xs font-medium">Zumba Básico</span>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="text-verde text-sm font-medium">🔒 Solo miembros</span>
+              </div>
+            </div>
+            <div class="relative rounded-xl overflow-hidden aspect-video bg-gris cursor-pointer group" onclick="openModal('loginModal')">
+              <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80" alt="Funcional" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity">
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center mb-2">
+                  <svg class="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span class="text-white text-xs font-medium">Funcional Total</span>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="text-verde text-sm font-medium">🔒 Solo miembros</span>
+              </div>
+            </div>
+            <div class="relative rounded-xl overflow-hidden aspect-video bg-gris cursor-pointer group" onclick="openModal('loginModal')">
+              <img src="https://images.unsplash.com/photo-1593810451137-5dc55105dace?w=400&q=80" alt="Stretching" class="w-full h-full object-cover opacity-60 group-hover:opacity-40 transition-opacity">
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center mb-2">
+                  <svg class="w-5 h-5 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span class="text-white text-xs font-medium">Stretching & Relax</span>
+              </div>
+              <div class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="text-verde text-sm font-medium">🔒 Solo miembros</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================
+       TIENDA
+       ===================== -->
+  <section class="py-24 bg-oscuro" id="tienda">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="mb-12 fade-in">
+        <span class="text-verde text-xs uppercase tracking-widest font-medium">Shop</span>
+        <h2 class="font-display text-5xl md:text-6xl mt-2">NUESTRA <span class="gradient-text">TIENDA</span></h2>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex gap-3 mb-10 fade-in">
+        <button onclick="filterTienda('ropa')" id="tab-ropa" class="tienda-tab active px-6 py-2 rounded-full text-sm font-medium bg-verde text-oscuro transition-all">
+          Ropa deportiva
+        </button>
+        <button onclick="filterTienda('suplementos')" id="tab-suplementos" class="tienda-tab px-6 py-2 rounded-full text-sm font-medium border border-white/20 text-white/60 hover:text-white transition-all">
+          Suplementos
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5" id="tiendaGrid">
+
+        <!-- Ropa deportiva -->
+        <div class="fade-in producto-item categoria-ropa bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Musculosa Fuzion" data-price="8500" data-cat="ropa">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1571945153237-4929e783af4a?w=400&q=80" alt="Musculosa" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+            <span class="absolute top-3 left-3 bg-verde text-oscuro text-xs font-medium px-2 py-0.5 rounded-full">Nuevo</span>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Ropa</div>
+            <div class="font-medium text-sm mb-2">Musculosa Fuzion</div>
+            <div class="text-verde font-medium text-sm mb-3">$8.500</div>
+            <div class="flex gap-1 mb-3">
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">S</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">M</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">L</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">XL</button>
+            </div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div class="fade-in producto-item categoria-ropa bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Short Deportivo" data-price="7200" data-cat="ropa" style="transition-delay:0.1s">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1591195853828-11db59a44f43?w=400&q=80" alt="Short" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Ropa</div>
+            <div class="font-medium text-sm mb-2">Short Deportivo</div>
+            <div class="text-verde font-medium text-sm mb-3">$7.200</div>
+            <div class="flex gap-1 mb-3">
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">S</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">M</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">L</button>
+            </div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div class="fade-in producto-item categoria-ropa bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Buzo Fuzion" data-price="15900" data-cat="ropa" style="transition-delay:0.2s">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80" alt="Buzo" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+            <span class="absolute top-3 left-3 bg-magenta text-white text-xs font-medium px-2 py-0.5 rounded-full">-20%</span>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Ropa</div>
+            <div class="font-medium text-sm mb-2">Buzo Fuzion</div>
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-verde font-medium text-sm">$15.900</span>
+              <span class="text-white/30 text-xs line-through">$19.900</span>
+            </div>
+            <div class="flex gap-1 mb-3">
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">S</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">M</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">L</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">XL</button>
+            </div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div class="fade-in producto-item categoria-ropa bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Calza Deportiva" data-price="11500" data-cat="ropa" style="transition-delay:0.3s">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1548032885-b5e38734688a?w=400&q=80" alt="Calza" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Ropa</div>
+            <div class="font-medium text-sm mb-2">Calza Deportiva</div>
+            <div class="text-verde font-medium text-sm mb-3">$11.500</div>
+            <div class="flex gap-1 mb-3">
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">S</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">M</button>
+              <button class="talle-btn w-7 h-7 text-xs border border-white/20 rounded text-white/60 hover:border-verde hover:text-verde transition-colors">L</button>
+            </div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <!-- Suplementos (ocultos por defecto) -->
+        <div class="fade-in producto-item categoria-suplementos hidden bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Creatina 300g" data-price="18900" data-cat="suplementos">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400&q=80" alt="Creatina" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+            <span class="absolute top-3 left-3 bg-violeta text-white text-xs font-medium px-2 py-0.5 rounded-full">Top ventas</span>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Suplemento</div>
+            <div class="font-medium text-sm mb-2">Creatina 300g</div>
+            <div class="text-verde font-medium text-sm mb-3">$18.900</div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div class="fade-in producto-item categoria-suplementos hidden bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Colágeno 400g" data-price="16500" data-cat="suplementos" style="transition-delay:0.1s">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1617606003057-dfcef3bab27a?w=400&q=80" alt="Colageno" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Suplemento</div>
+            <div class="font-medium text-sm mb-2">Colágeno 400g</div>
+            <div class="text-verde font-medium text-sm mb-3">$16.500</div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div class="fade-in producto-item categoria-suplementos hidden bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="Proteína Whey 1kg" data-price="32000" data-cat="suplementos" style="transition-delay:0.2s">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1593095948071-474c5cc2989d?w=400&q=80" alt="Proteina" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+            <span class="absolute top-3 left-3 bg-verde text-oscuro text-xs font-medium px-2 py-0.5 rounded-full">Nuevo</span>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Suplemento</div>
+            <div class="font-medium text-sm mb-2">Proteína Whey 1kg</div>
+            <div class="text-verde font-medium text-sm mb-3">$32.000</div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+        <div class="fade-in producto-item categoria-suplementos hidden bg-gris2 border border-white/10 rounded-2xl overflow-hidden card-glow group" data-name="BCAA 300g" data-price="14200" data-cat="suplementos" style="transition-delay:0.3s">
+          <div class="relative overflow-hidden aspect-square">
+            <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&q=80" alt="BCAA" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <button class="wishlist-btn absolute top-3 right-3 w-8 h-8 bg-black/40 backdrop-blur rounded-full flex items-center justify-center text-white hover:text-magenta transition-colors text-lg">♡</button>
+          </div>
+          <div class="p-4">
+            <div class="text-white/40 text-xs uppercase tracking-wide mb-1">Suplemento</div>
+            <div class="font-medium text-sm mb-2">BCAA 300g</div>
+            <div class="text-verde font-medium text-sm mb-3">$14.200</div>
+            <button onclick="addToCart(this)" class="w-full bg-verde/10 border border-verde/30 text-verde text-xs py-2 rounded-full hover:bg-verde hover:text-oscuro transition-all">
+              Agregar al carrito
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================
+       CONTACTO
+       ===================== -->
+  <section class="py-24 bg-gris" id="contacto">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid md:grid-cols-2 gap-16 items-start">
+
+        <div class="fade-in">
+          <span class="text-verde text-xs uppercase tracking-widest font-medium">Contacto</span>
+          <h2 class="font-display text-5xl md:text-6xl mt-2 mb-6">¿TENÉS ALGUNA <span class="gradient-text">CONSULTA?</span></h2>
+          <p class="text-white/50 mb-10">Escribinos y te respondemos en menos de 24 horas.</p>
+
+          <!-- Info -->
+          <div class="space-y-4 mb-10">
+            <div class="flex items-center gap-4 p-4 bg-gris2 rounded-xl border border-white/10">
+              <span class="text-xl">📍</span>
+              <div>
+                <div class="text-xs text-white/40 uppercase tracking-wide">Dirección</div>
+                <div class="text-sm text-white/80">Moreno 3857, Santo Tomé, Santa Fe</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 p-4 bg-gris2 rounded-xl border border-white/10">
+              <span class="text-xl">🕐</span>
+              <div>
+                <div class="text-xs text-white/40 uppercase tracking-wide">Horarios</div>
+                <div class="text-sm text-white/80">Lun a Vie: 8:00 – 21:00 hs · Sáb: 8:30 – 12:00 hs</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Redes -->
+          <div>
+            <div class="text-xs text-white/40 uppercase tracking-widest mb-4">Seguinos en redes</div>
+            <div class="flex gap-3">
+              <a href="https://instagram.com/fuzion_fitness_dance" target="_blank" class="flex items-center gap-2 bg-gris2 border border-white/10 px-4 py-2.5 rounded-full text-sm text-white/70 hover:border-magenta/40 hover:text-magenta transition-all">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                Instagram
+              </a>
+              <a href="https://wa.me/5493426000000" target="_blank" class="flex items-center gap-2 bg-gris2 border border-white/10 px-4 py-2.5 rounded-full text-sm text-white/70 hover:border-verde/40 hover:text-verde transition-all">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.118 1.523 5.847L.057 23.882l6.2-1.627A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.371l-.36-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                WhatsApp
+              </a>
+              <a href="https://facebook.com/fuzionfitnessydance" target="_blank" class="flex items-center gap-2 bg-gris2 border border-white/10 px-4 py-2.5 rounded-full text-sm text-white/70 hover:border-blue-400/40 hover:text-blue-400 transition-all">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook
+              </a>
+              <a href="https://youtube.com/@fuzionfitnessydance" target="_blank" class="flex items-center gap-2 bg-gris2 border border-white/10 px-4 py-2.5 rounded-full text-sm text-white/70 hover:border-red-500/40 hover:text-red-400 transition-all">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+                YouTube
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="fade-in" style="transition-delay:0.2s">
+          <form class="bg-gris2 border border-white/10 rounded-2xl p-8 space-y-5" action="https://formspree.io/f/xkoqekpb" method="POST">
+            <div>
+              <label class="block text-xs text-white/40 uppercase tracking-wide mb-2">Nombre</label>
+              <input type="text" name="nombre" placeholder="Tu nombre" required class="w-full bg-oscuro border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-verde/40 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-white/40 uppercase tracking-wide mb-2">Email</label>
+              <input type="email" name="email" placeholder="tu@email.com" required class="w-full bg-oscuro border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-verde/40 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-white/40 uppercase tracking-wide mb-2">Actividad de interés</label>
+              <select name="actividad" class="w-full bg-oscuro border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-verde/40 transition-colors">
+                <option value="">Seleccioná una actividad</option>
+                <option>Zumba</option>
+                <option>Funcional</option>
+                <option>Stretching</option>
+                <option>Boxeo</option>
+                <option>Strong Nation</option>
+                <option>Acrotelas</option>
+                <option>Zumba Kids</option>
+                <option>GAP</option>
+                <option>Membresía</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-white/40 uppercase tracking-wide mb-2">Mensaje</label>
+              <textarea name="mensaje" rows="4" placeholder="Contanos tu consulta..." required class="w-full bg-oscuro border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-verde/40 transition-colors resize-none"></textarea>
+            </div>
+            <button type="submit" class="w-full bg-verde text-oscuro py-3 rounded-full font-medium text-sm hover:opacity-85 transition-opacity">
+              Enviar consulta
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================
+       FOOTER
+       ===================== -->
+  <footer class="bg-oscuro border-t border-white/5 py-10 px-6">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="font-display text-3xl gradient-text">fuZion Fitness & Dance</div>
+      <div class="text-white/30 text-sm text-center">© 2025 Fuzion Fitness & Dance · Moreno 3857, Santo Tomé</div>
+      <div class="flex gap-6">
+        <a href="#actividades" class="text-white/40 text-sm hover:text-white transition-colors">Actividades</a>
+        <a href="#tienda" class="text-white/40 text-sm hover:text-white transition-colors">Tienda</a>
+        <a href="#contacto" class="text-white/40 text-sm hover:text-white transition-colors">Contacto</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =====================
+       CART DRAWER
+       ===================== -->
+  <div id="cartOverlay" class="fixed inset-0 bg-black/60 z-50 hidden" onclick="closeCart()"></div>
+  <aside id="cartDrawer" class="fixed top-0 right-0 h-full w-80 max-w-full bg-gris border-l border-white/10 z-50 flex flex-col translate-x-full transition-transform duration-300">
+    <div class="flex items-center justify-between p-6 border-b border-white/10">
+      <h3 class="font-display text-xl">CARRITO</h3>
+      <button onclick="closeCart()" class="text-white/40 hover:text-white transition-colors text-2xl leading-none">&times;</button>
+    </div>
+    <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+      <div id="cartEmpty" class="text-white/30 text-sm text-center mt-8">Tu carrito está vacío</div>
+    </div>
+    <div class="p-6 border-t border-white/10">
+      <div class="flex justify-between mb-4 text-sm">
+        <span class="text-white/60">Total</span>
+        <span id="cartTotal" class="text-verde font-medium">$0</span>
+      </div>
+      <button id="cartCheckout" onclick="checkout()" disabled class="w-full bg-verde text-oscuro py-3 rounded-full font-medium text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-85 transition-opacity">
+        Finalizar compra
+      </button>
+    </div>
+  </aside>
+
+  <!-- =====================
+       LOGIN MODAL
+       ===================== -->
+  <div id="loginModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gris border border-white/10 rounded-2xl p-8 w-full max-w-md relative">
+      <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-white/40 hover:text-white text-2xl leading-none">&times;</button>
+      <div class="font-display text-3xl gradient-text mb-2">fuZion</div>
+      <h3 class="text-white font-medium mb-6">Iniciar sesión</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs text-white/40 uppercase tracking-wide mb-2">Email</label>
+          <input type="email" placeholder="tu@email.com" class="w-full bg-oscuro border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-verde/40 transition-colors">
+        </div>
+        <div>
+          <label class="block text-xs text-white/40 uppercase tracking-wide mb-2">Contraseña</label>
+          <input type="password" placeholder="••••••••" class="w-full bg-oscuro border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-verde/40 transition-colors">
+        </div>
+        <button class="w-full bg-verde text-oscuro py-3 rounded-full font-medium text-sm hover:opacity-85 transition-opacity">
+          Ingresar
+        </button>
+        <p class="text-center text-white/40 text-xs">
+          ¿No tenés cuenta? <a href="#membresias" onclick="closeModal('loginModal')" class="text-verde hover:underline">Ver membresías</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhatsApp flotante -->
+  <a href="https://wa.me/5493426000000" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform z-40">
+    <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.118 1.523 5.847L.057 23.882l6.2-1.627A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.006-1.371l-.36-.214-3.68.965.981-3.595-.234-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+  </a>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
